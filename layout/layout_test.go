@@ -104,6 +104,29 @@ func TestE2E(t *testing.T) {
 		},
 	}
 
+	layersLayout := layout.SugiyamaLayersStrategyGraphLayout{
+		CycleRemover:   layout.NewSimpleCycleRemover(),
+		LevelsAssigner: layout.NewLayeredGraph,
+		OrderingAssigner: layout.WarfieldOrderingOptimizer{
+			Epochs:                   100,
+			LayerOrderingInitializer: layout.BFSOrderingInitializer{},
+			LayerOrderingOptimizer: layout.CompositeLayerOrderingOptimizer{
+				Optimizers: []layout.LayerOrderingOptimizer{
+					layout.WMedianOrderingOptimizer{},
+					layout.SwitchAdjacentOrderingOptimizer{},
+				},
+			},
+		}.Optimize,
+		NodesHorizontalCoordinatesAssigner: layout.BrandesKopfLayersNodesHorizontalAssigner{
+			Delta: 25,
+		},
+		NodesVerticalCoordinatesAssigner: layout.BasicNodesVerticalCoordinatesAssigner{
+			MarginLayers:   25,
+			FakeNodeHeight: 25,
+		},
+		EdgePathAssigner: layout.StraightEdgePathAssigner{}.UpdateGraphLayout,
+	}
+
 	layouts := []struct {
 		name string
 		l    layout.Layout
@@ -162,27 +185,15 @@ func TestE2E(t *testing.T) {
 		},
 		{
 			name: "layers",
-			l: layout.SugiyamaLayersStrategyGraphLayout{
-				CycleRemover:   layout.NewSimpleCycleRemover(),
-				LevelsAssigner: layout.NewLayeredGraph,
-				OrderingAssigner: layout.WarfieldOrderingOptimizer{
-					Epochs:                   100,
-					LayerOrderingInitializer: layout.BFSOrderingInitializer{},
-					LayerOrderingOptimizer: layout.CompositeLayerOrderingOptimizer{
-						Optimizers: []layout.LayerOrderingOptimizer{
-							layout.WMedianOrderingOptimizer{},
-							layout.SwitchAdjacentOrderingOptimizer{},
-						},
-					},
-				}.Optimize,
-				NodesHorizontalCoordinatesAssigner: layout.BrandesKopfLayersNodesHorizontalAssigner{
-					Delta: 25,
+			l:    layersLayout,
+		},
+		{
+			name: "layers_orthogonal",
+			l: layout.SequenceLayout{
+				Layouts: []layout.Layout{
+					layersLayout,
+					layout.OrthogonalEdgeRouter{},
 				},
-				NodesVerticalCoordinatesAssigner: layout.BasicNodesVerticalCoordinatesAssigner{
-					MarginLayers:   25,
-					FakeNodeHeight: 25,
-				},
-				EdgePathAssigner: layout.StraightEdgePathAssigner{}.UpdateGraphLayout,
 			},
 		},
 	}

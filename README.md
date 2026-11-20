@@ -16,9 +16,9 @@ However, given this is very complex task this is work in progress.
 - [x] Spring force
 - [ ] Kozo Sugiyama Magnetic Force
 - [ ] Metro Style edges
-- [ ] Ports for edges
+- [x] Ports for edges
 - [ ] Spline edges
-- [ ] Collision avoidance (dot) edge path algorithm
+- [x] Collision avoidance orthogonal edge routing (A* over obstacle grid, `OrthogonalEdgeRouter`)
 
 ## Contributions
 
